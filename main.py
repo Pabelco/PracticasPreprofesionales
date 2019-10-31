@@ -29,9 +29,10 @@ def create_training_data():
 	CATEGORIES = ["Acinetobacter.baumanii", "Actinomyces.israeli", "Bacteroides.fragilis", "Bifidobacterium.spp", "Escherichia.coli"]
 
 	training_data = []
+	training_data_test = []
 
 	for category in CATEGORIES:
-
+		contador = 0
 		path = os.path.join(DATADIR,category)  # path
 		class_num = CATEGORIES.index(category)  # get the classification  (0 or a 1). 0=baumanii 1=israeli
 
@@ -39,10 +40,14 @@ def create_training_data():
 			try:
 				img_array = cv2.imread(os.path.join(path,img) ,cv2.IMREAD_COLOR)  # convert to array
 				new_array = cv2.resize(img_array, (IMG_SIZE, IMG_SIZE))  # resize to normalize data size
-				training_data.append([new_array, class_num])  # add this to our training_data
+				if contador <= 0:
+					training_data_test.append([new_array, class_num])
+				else:
+					training_data.append([new_array, class_num])  # add this to our training_data
 			except Exception as e:  # in the interest in keeping the output clean...
 				print(e)
 				pass
+			contador += 1
 			#except OSError as e:
 			#	print("OSErrroBad img most likely", e, os.path.join(path,img))
 			#except Exception as e:
@@ -50,18 +55,30 @@ def create_training_data():
 
 	# Si no se desordena mandaria primero todas las de una clase
 	random.shuffle(training_data)
+	random.shuffle(training_data_test)
+
 
 	X = []
 	y = []
 
-	for features,label in training_data:
-		X.append(features)
-		y.append(label)
+	X_test = []
+	y_test = []
 
-	print(X[0].reshape(-1, IMG_SIZE, IMG_SIZE, 3))
+	for features,label in training_data:
+			X.append(features)
+			y.append(label)
+
+	for features,label in training_data_test:
+			X_test.append(features)
+			y_test.append(label)
+
+	#print(X[0].reshape(-1, IMG_SIZE, IMG_SIZE, 3))
 
 	X = np.array(X).reshape(-1, IMG_SIZE, IMG_SIZE, 3)
 	y = np.array(y)
+
+	X_test = np.array(X_test).reshape(-1, IMG_SIZE, IMG_SIZE, 3)
+	y_test = np.array(y_test)
 
 	pickle_out = open("X.pickle","wb")
 	pickle.dump(X, pickle_out)
@@ -71,12 +88,26 @@ def create_training_data():
 	pickle.dump(y, pickle_out)
 	pickle_out.close()
 
+	pickle_out = open("X_test.pickle","wb")
+	pickle.dump(X_test, pickle_out)
+	pickle_out.close()
+
+	pickle_out = open("y_test.pickle","wb")
+	pickle.dump(y_test, pickle_out)
+	pickle_out.close()
+
 try:
 	pickle_in = open("X.pickle","rb")
 	X = pickle.load(pickle_in)
 
 	pickle_in = open("y.pickle","rb")
 	y = pickle.load(pickle_in)
+
+	pickle_in = open("X_test.pickle","rb")
+	X_test = pickle.load(pickle_in)
+
+	pickle_in = open("y_test.pickle","rb")
+	y_test = pickle.load(pickle_in)
 except Exception as e:
 	create_training_data() # Esto solo debe hacer la primera vez
 
@@ -86,9 +117,17 @@ except Exception as e:
 	pickle_in = open("y.pickle","rb")
 	y = pickle.load(pickle_in)
 
+	pickle_in = open("X_test.pickle","rb")
+	X_test = pickle.load(pickle_in)
+
+	pickle_in = open("y_test.pickle","rb")
+	y_test = pickle.load(pickle_in)
+
 
 X = X/255.0
 #X = normalize(X, axis=-1, order=2)
+
+X_test = X_test/255.0
 
 #Data augmentation
 datagen = ImageDataGenerator(
@@ -100,10 +139,20 @@ datagen = ImageDataGenerator(
     horizontal_flip=True,
     vertical_flip=True,)
 
+datagen_test = ImageDataGenerator(
+    featurewise_center=True,				#Setea la media del dataset a 0
+    featurewise_std_normalization=True,		#Normaliza con desviacion estandard (divide cada input para su desviacion estandard)
+    rotation_range=20,
+    width_shift_range=0.2,
+    height_shift_range=0.2,
+    horizontal_flip=True,
+    vertical_flip=True,)
+
 datagen.fit(X)
 it = datagen.flow(X, y, batch_size=10)
 
-
+datagen_test.fit(X_test)
+it_test = datagen.flow(X_test, y_test, batch_size=10)
 
 
 model = Sequential()
@@ -132,7 +181,7 @@ model.compile(loss='binary_crossentropy',
 #model.fit(X, y, batch_size=10, epochs=5, validation_split=0.3)
 
 #Con data augmentation
-model.fit_generator(it, epochs=5, steps_per_epoch=2) #steps_per_epoch * batch_size = number_of_rows_in_train_data
+model.fit_generator(it, epochs=5, steps_per_epoch=2, validation_data=it_test) #steps_per_epoch * batch_size = number_of_rows_in_train_data
 
 #Guardar modelo
 #model.save('prueba.model')
