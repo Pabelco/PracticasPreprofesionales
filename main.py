@@ -26,7 +26,7 @@ IMG_SIZE = 50
 def create_training_data():
 	DATADIR = "./"
 
-	CATEGORIES = ["Acinetobacter.baumanii", "Actinomyces.israeli", "Bacteroides.fragilis", "Bifidobacterium.spp"]
+	CATEGORIES = ["Acinetobacter.baumanii", "Actinomyces.israeli", "Bacteroides.fragilis", "Bifidobacterium.spp", "Escherichia.coli"]
 
 	training_data = []
 
