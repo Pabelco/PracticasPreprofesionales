@@ -1,0 +1,8 @@
+opencv-python
+tensorflow
+pickle-mixin
+numpy
+matplotlib
+tqdm
+SciPy
+#tensorflow-gpu
