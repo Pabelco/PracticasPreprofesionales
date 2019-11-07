@@ -6,6 +6,8 @@ from tensorflow.keras.layers import Dense, Dropout, Activation, Flatten
 from tensorflow.keras.layers import Conv2D, MaxPooling2D
 
 from tensorflow.keras.utils import normalize
+
+from tensorflow.keras import optimizers
 # example of using ImageDataGenerator to normalize images
 #from keras.datasets import mnist
 
@@ -32,7 +34,7 @@ def create_training_data():
 	training_data_test = []
 
 	for category in CATEGORIES:
-		contador = 0
+		
 		path = os.path.join(DATADIR,category)  # path
 		class_num = CATEGORIES.index(category)  # get the classification  (0 or a 1). 0=baumanii 1=israeli
 
@@ -40,14 +42,11 @@ def create_training_data():
 			try:
 				img_array = cv2.imread(os.path.join(path,img) ,cv2.IMREAD_COLOR)  # convert to array
 				new_array = cv2.resize(img_array, (IMG_SIZE, IMG_SIZE))  # resize to normalize data size
-				if contador <= 0:
-					training_data_test.append([new_array, class_num])
-				else:
-					training_data.append([new_array, class_num])  # add this to our training_data
+				training_data.append([new_array, class_num])  # add this to our training_data
 			except Exception as e:  # in the interest in keeping the output clean...
 				print(e)
 				pass
-			contador += 1
+			
 			#except OSError as e:
 			#	print("OSErrroBad img most likely", e, os.path.join(path,img))
 			#except Exception as e:
@@ -55,7 +54,7 @@ def create_training_data():
 
 	# Si no se desordena mandaria primero todas las de una clase
 	random.shuffle(training_data)
-	random.shuffle(training_data_test)
+	#random.shuffle(training_data_test)
 
 
 	X = []
@@ -64,13 +63,15 @@ def create_training_data():
 	X_test = []
 	y_test = []
 
+	contador = 0
 	for features,label in training_data:
-			X.append(features)
-			y.append(label)
-
-	for features,label in training_data_test:
+		if contador < 21:	#Agregando 20 datos (20% de los 109) para testing
 			X_test.append(features)
 			y_test.append(label)
+		else:
+			X.append(features)
+			y.append(label)
+		contador += 1
 
 	#print(X[0].reshape(-1, IMG_SIZE, IMG_SIZE, 3))
 
@@ -149,16 +150,17 @@ datagen_test = ImageDataGenerator(
     vertical_flip=True,)
 
 datagen.fit(X)
-it = datagen.flow(X, y, batch_size=10)
+it = datagen.flow(X, y, batch_size=44)
 
 datagen_test.fit(X_test)
-it_test = datagen.flow(X_test, y_test, batch_size=10)
+it_test = datagen.flow(X_test, y_test, batch_size=44)
 
 
 model = Sequential()
 
 model.add(Conv2D(256, (3, 3), input_shape=X.shape[1:]))
 model.add(Activation('relu'))
+#model.add(Dropout(0.25))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 
 model.add(Conv2D(256, (3, 3)))
@@ -168,20 +170,24 @@ model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Flatten())  # Convierte el feature maps 3D a un feature vectors 1D
 
 model.add(Dense(64))
-model.add(Activation('sigmoid'))
+model.add(Activation('relu'))
 
 model.add(Dense(1))
-model.add(Activation('sigmoid'))
+model.add(Activation('softmax'))
 
+
+
+
+opt = optimizers.Adam(lr=0.01, clipvalue=0.25)
 model.compile(loss='binary_crossentropy',
-			  optimizer='adam',
+			  optimizer=opt,
 			  metrics=['accuracy'])
 
 #Sin data augmentation
 #model.fit(X, y, batch_size=10, epochs=5, validation_split=0.3)
 
 #Con data augmentation
-model.fit_generator(it, epochs=5, steps_per_epoch=2, validation_data=it_test) #steps_per_epoch * batch_size = number_of_rows_in_train_data
+historia = model.fit_generator(it, epochs=5, steps_per_epoch=1, validation_data=it_test) #steps_per_epoch * batch_size = number_of_rows_in_train_data
 
 #Guardar modelo
 #model.save('prueba.model')
@@ -191,3 +197,25 @@ model.fit_generator(it, epochs=5, steps_per_epoch=2, validation_data=it_test) #s
 
 #predictions = new_model.predict([X])
 
+
+#############################################
+#Graficar curvas de precicion y perdida
+
+accuracy = historia.history['accuracy']
+val_accuracy = historia.history['val_accuracy']
+loss = historia.history['loss']
+val_loss = historia.history['val_loss']
+epochs = range(len(accuracy))
+
+plt.plot(epochs, accuracy, 'bo', label='Training accuracy')
+plt.plot(epochs, val_accuracy, 'b', label='Validation accuracy')
+plt.title('Training and validation accuracy')
+plt.legend()
+plt.figure()
+
+plt.plot(epochs, loss, 'bo', label='Training loss')
+plt.plot(epochs, val_loss, 'b', label='Validation loss')
+plt.title('Training and validation loss')
+plt.legend()
+
+plt.show()
