@@ -28,7 +28,7 @@ IMG_SIZE = 50
 def create_training_data():
 	DATADIR = "./"
 
-	CATEGORIES = ["Acinetobacter.baumanii", "Actinomyces.israeli", "Bacteroides.fragilis", "Bifidobacterium.spp", "Escherichia.coli"]
+	CATEGORIES = ["Geobacillus.stearothermophilus", "Klebsiella.aerogenes", "Micrococcus.sp"]
 
 	training_data = []
 	training_data_test = []
@@ -65,7 +65,7 @@ def create_training_data():
 
 	contador = 0
 	for features,label in training_data:
-		if contador < 21:	#Agregando 20 datos (20% de los 109) para testing
+		if contador < 0.2 * len(training_data):	#Agregando 20% de los datos para testing
 			X_test.append(features)
 			y_test.append(label)
 		else:
@@ -150,10 +150,10 @@ datagen_test = ImageDataGenerator(
     vertical_flip=True,)
 
 datagen.fit(X)
-it = datagen.flow(X, y, batch_size=44)
+it = datagen.flow(X, y, batch_size=1)
 
 datagen_test.fit(X_test)
-it_test = datagen.flow(X_test, y_test, batch_size=44)
+it_test = datagen.flow(X_test, y_test, batch_size=1)
 
 
 model = Sequential()
