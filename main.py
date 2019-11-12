@@ -21,8 +21,10 @@ from tqdm import tqdm
 import random
 
 IMG_SIZE = 50
-
-
+#IMG_SIZE = 100
+#IMG_SIZE = 800
+#IMG_SIZE_X = 600
+#IMG_SIZE_Y = 800
 
 
 def create_training_data():
@@ -36,8 +38,9 @@ def create_training_data():
 	for category in CATEGORIES:
 		
 		path = os.path.join(DATADIR,category)  # path
-		class_num = CATEGORIES.index(category)  # get the classification  (0 or a 1). 0=baumanii 1=israeli
+		class_num = CATEGORIES.index(category)  # get the classification (0 or a 1...) 0=Geobacillus 1=Klebsiella...
 
+		
 		for img in tqdm(os.listdir(path)):  # iterate over each image
 			try:
 				img_array = cv2.imread(os.path.join(path,img) ,cv2.IMREAD_COLOR)  # convert to array
@@ -46,7 +49,6 @@ def create_training_data():
 			except Exception as e:  # in the interest in keeping the output clean...
 				print(e)
 				pass
-			
 			#except OSError as e:
 			#	print("OSErrroBad img most likely", e, os.path.join(path,img))
 			#except Exception as e:
@@ -54,8 +56,6 @@ def create_training_data():
 
 	# Si no se desordena mandaria primero todas las de una clase
 	random.shuffle(training_data)
-	#random.shuffle(training_data_test)
-
 
 	X = []
 	y = []
@@ -127,22 +127,21 @@ except Exception as e:
 
 X = X/255.0
 #X = normalize(X, axis=-1, order=2)
-
 X_test = X_test/255.0
 
 #Data augmentation
 datagen = ImageDataGenerator(
-    featurewise_center=True,				#Setea la media del dataset a 0
-    featurewise_std_normalization=True,		#Normaliza con desviacion estandard (divide cada input para su desviacion estandard)
+    featurewise_center=False,				#Setea la media del dataset a 0
+    featurewise_std_normalization=False,		#Normaliza con desviacion estandard (divide cada input para su desviacion estandard)
     rotation_range=20,
-    width_shift_range=0.2,
-    height_shift_range=0.2,
+    width_shift_range=0.1,
+    height_shift_range=0.1,
     horizontal_flip=True,
     vertical_flip=True,)
 
 datagen_test = ImageDataGenerator(
-    featurewise_center=True,				#Setea la media del dataset a 0
-    featurewise_std_normalization=True,		#Normaliza con desviacion estandard (divide cada input para su desviacion estandard)
+    featurewise_center=False,				#Setea la media del dataset a 0
+    featurewise_std_normalization=False,		#Normaliza con desviacion estandard (divide cada input para su desviacion estandard)
     rotation_range=20,
     width_shift_range=0.2,
     height_shift_range=0.2,
@@ -155,10 +154,18 @@ it = datagen.flow(X, y, batch_size=1)
 datagen_test.fit(X_test)
 it_test = datagen.flow(X_test, y_test, batch_size=1)
 
+#Para graficar las imagenes generadas por data Augmentation
+for i in range(9):
+	plt.subplot(330 + 1 + i)
+	batch = it.next()
+	image = batch[0][0] * 255.0	#Se multiplica por 255 porqe antes se normalizo dividiendo para 255
+	image = image.astype('uint8')
+	plt.imshow(image)
+############################################################
 
 model = Sequential()
 
-model.add(Conv2D(256, (3, 3), input_shape=X.shape[1:]))
+model.add(Conv2D(256, (5, 5), input_shape=X.shape[1:]))
 model.add(Activation('relu'))
 #model.add(Dropout(0.25))
 model.add(MaxPooling2D(pool_size=(2, 2)))
@@ -184,10 +191,10 @@ model.compile(loss='binary_crossentropy',
 			  metrics=['accuracy'])
 
 #Sin data augmentation
-#model.fit(X, y, batch_size=10, epochs=5, validation_split=0.3)
+#model.fit(X, y, batch_size=10, epochs=5, validation_split=0.2)
 
 #Con data augmentation
-historia = model.fit_generator(it, epochs=5, steps_per_epoch=1, validation_data=it_test) #steps_per_epoch * batch_size = number_of_rows_in_train_data
+historia = model.fit_generator(it, epochs=3, steps_per_epoch=12, validation_data=it_test) #steps_per_epoch * batch_size = number_of_rows_in_train_data
 
 #Guardar modelo
 #model.save('prueba.model')
