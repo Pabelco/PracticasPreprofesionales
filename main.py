@@ -44,9 +44,20 @@ def create_training_data():
 		for img in tqdm(os.listdir(path)):  # iterate over each image
 			try:
 				img_array = cv2.imread(os.path.join(path,img) ,cv2.IMREAD_COLOR)  # convert to array
-				new_array = cv2.resize(img_array, (IMG_SIZE, IMG_SIZE))  # resize to normalize data size
-				training_data.append([new_array, class_num])  # add this to our training_data
+
+				height = img_array.shape[0]
+				width = img_array.shape[1]
+
+				for j in range(3):
+					for i in range(4):
+						crop_img = img_array[i*height//4:(i+1)*height//4, j*width//3:(j+1)*width//3]
+
+						new_array = cv2.resize(crop_img, (IMG_SIZE, IMG_SIZE))  # resize to normalize data size
+						training_data.append([new_array, class_num])  # add this to our training_data
+
+						#cv2.imshow("cropped_"+str(i)+'_'+str(j), new_array)
 			except Exception as e:  # in the interest in keeping the output clean...
+				raise
 				print(e)
 				pass
 			#except OSError as e:
@@ -149,25 +160,27 @@ datagen_test = ImageDataGenerator(
     vertical_flip=True,)
 
 datagen.fit(X)
-it = datagen.flow(X, y, batch_size=1)
+it = datagen.flow(X, y, batch_size=2)
 
 datagen_test.fit(X_test)
 it_test = datagen.flow(X_test, y_test, batch_size=1)
 
 #Para graficar las imagenes generadas por data Augmentation
+'''
 for i in range(9):
 	plt.subplot(330 + 1 + i)
 	batch = it.next()
 	image = batch[0][0] * 255.0	#Se multiplica por 255 porqe antes se normalizo dividiendo para 255
 	image = image.astype('uint8')
 	plt.imshow(image)
+'''
 ############################################################
 
 model = Sequential()
 
 model.add(Conv2D(256, (5, 5), input_shape=X.shape[1:]))
 model.add(Activation('relu'))
-#model.add(Dropout(0.25))
+model.add(Dropout(0.25))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 
 model.add(Conv2D(256, (3, 3)))
@@ -180,7 +193,7 @@ model.add(Dense(64))
 model.add(Activation('relu'))
 
 model.add(Dense(1))
-model.add(Activation('softmax'))
+model.add(Activation('relu'))
 
 
 
@@ -194,7 +207,7 @@ model.compile(loss='binary_crossentropy',
 #model.fit(X, y, batch_size=10, epochs=5, validation_split=0.2)
 
 #Con data augmentation
-historia = model.fit_generator(it, epochs=3, steps_per_epoch=12, validation_data=it_test) #steps_per_epoch * batch_size = number_of_rows_in_train_data
+historia = model.fit_generator(it, epochs=3, steps_per_epoch=12, validation_data=it_test, validation_steps=28) #steps_per_epoch * batch_size = number_of_rows_in_train_data
 
 #Guardar modelo
 #model.save('prueba.model')
@@ -207,7 +220,7 @@ historia = model.fit_generator(it, epochs=3, steps_per_epoch=12, validation_data
 
 #############################################
 #Graficar curvas de precicion y perdida
-
+'''
 accuracy = historia.history['accuracy']
 val_accuracy = historia.history['val_accuracy']
 loss = historia.history['loss']
@@ -226,3 +239,4 @@ plt.title('Training and validation loss')
 plt.legend()
 
 plt.show()
+'''
