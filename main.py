@@ -21,7 +21,7 @@ from tqdm import tqdm
 import random
 
 IMG_SIZE = 50
-#IMG_SIZE = 100
+IMG_SIZE = 100
 #IMG_SIZE = 800
 #IMG_SIZE_X = 600
 #IMG_SIZE_Y = 800
@@ -166,30 +166,36 @@ datagen_test.fit(X_test)
 it_test = datagen.flow(X_test, y_test, batch_size=1)
 
 #Para graficar las imagenes generadas por data Augmentation
-'''
+
 for i in range(9):
 	plt.subplot(330 + 1 + i)
 	batch = it.next()
-	image = batch[0][0] * 255.0	#Se multiplica por 255 porqe antes se normalizo dividiendo para 255
+	image = batch[0][0] * 255.0	#Se multiplica por 255 porque antes se normalizo dividiendo para 255
 	image = image.astype('uint8')
 	plt.imshow(image)
-'''
+plt.show()
 ############################################################
-
 model = Sequential()
 
-model.add(Conv2D(256, (5, 5), input_shape=X.shape[1:]))
+model.add(Conv2D(64, (3, 3), input_shape=X.shape[1:]))
 model.add(Activation('relu'))
 model.add(Dropout(0.25))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+
+model.add(Conv2D(128, (3, 3)))
+model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 
 model.add(Conv2D(256, (3, 3)))
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 
+
 model.add(Flatten())  # Convierte el feature maps 3D a un feature vectors 1D
 
-model.add(Dense(64))
+
+
+model.add(Dense(256))
 model.add(Activation('relu'))
 
 model.add(Dense(1))
@@ -198,7 +204,7 @@ model.add(Activation('relu'))
 
 
 
-opt = optimizers.Adam(lr=0.01, clipvalue=0.25)
+opt = optimizers.Adam(lr=0.0000001, decay=0.5 ,clipvalue=0.25)
 model.compile(loss='binary_crossentropy',
 			  optimizer=opt,
 			  metrics=['accuracy'])
@@ -207,7 +213,7 @@ model.compile(loss='binary_crossentropy',
 #model.fit(X, y, batch_size=10, epochs=5, validation_split=0.2)
 
 #Con data augmentation
-historia = model.fit_generator(it, epochs=3, steps_per_epoch=12, validation_data=it_test, validation_steps=28) #steps_per_epoch * batch_size = number_of_rows_in_train_data
+historia = model.fit_generator(it, epochs=20, steps_per_epoch=12, validation_data=it_test, validation_steps=28) #steps_per_epoch * batch_size = number_of_rows_in_train_data
 
 #Guardar modelo
 #model.save('prueba.model')
