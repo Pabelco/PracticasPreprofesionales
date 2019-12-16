@@ -173,7 +173,7 @@ for i in range(9):
 	image = batch[0][0] * 255.0	#Se multiplica por 255 porque antes se normalizo dividiendo para 255
 	image = image.astype('uint8')
 	plt.imshow(image)
-plt.show()
+#plt.show()
 ############################################################
 model = Sequential()
 
@@ -184,10 +184,12 @@ model.add(MaxPooling2D(pool_size=(2, 2)))
 
 model.add(Conv2D(128, (3, 3)))
 model.add(Activation('relu'))
+model.add(Dropout(0.25))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 
 model.add(Conv2D(256, (3, 3)))
 model.add(Activation('relu'))
+model.add(Dropout(0.25))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 
 
@@ -213,7 +215,7 @@ model.compile(loss='binary_crossentropy',
 #model.fit(X, y, batch_size=10, epochs=5, validation_split=0.2)
 
 #Con data augmentation
-historia = model.fit_generator(it, epochs=20, steps_per_epoch=12, validation_data=it_test, validation_steps=28) #steps_per_epoch * batch_size = number_of_rows_in_train_data
+historia = model.fit_generator(it, epochs=10, steps_per_epoch=12, validation_data=it_test, validation_steps=28) #steps_per_epoch * batch_size = number_of_rows_in_train_data
 
 #Guardar modelo
 #model.save('prueba.model')
