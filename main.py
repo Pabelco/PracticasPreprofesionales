@@ -159,10 +159,10 @@ datagen_test = ImageDataGenerator(
     vertical_flip=True,)
 
 datagen.fit(X)
-it = datagen.flow(X, y, batch_size=45)
+it = datagen.flow(X, y, batch_size=50)
 
 datagen_test.fit(X_test)
-it_test = datagen.flow(X_test, y_test, batch_size=45)
+it_test = datagen.flow(X_test, y_test, batch_size=50)
 
 #Para graficar las imagenes generadas por data Augmentation
 
@@ -255,14 +255,14 @@ model.compile(loss='binary_crossentropy',
 #filepath = "weights-improvement-{epoch:02d}-{val_accuracy:.2f}.hdf5"
 filepath = 'prueba.model'
 #checkpoint = ModelCheckpoint(filepath, monitor='val_accuracy', verbose=1, save_best_only=True, mode='max') #Con val_accuracy maximo
-checkpoint = ModelCheckpoint(filepath, monitor='val_accuracy', verbose=1, save_best_only=True, mode='max') #Con accuracy maximo
+checkpoint = ModelCheckpoint(filepath, monitor='accuracy', verbose=1, save_best_only=True, mode='max') #Con accuracy maximo
 callbacks_list = [checkpoint]
 
 #Sin data augmentation
 #model.fit(X, y, batch_size=45, epochs=5, validation_split=0.2)
 
 #Con data augmentation
-historia = model.fit_generator(it, epochs=10, steps_per_epoch=2, callbacks=callbacks_list, validation_data=it_test, validation_steps=2) #steps_per_epoch * batch_size = number_of_rows_in_train_data
+historia = model.fit_generator(it, epochs=10, steps_per_epoch=3, callbacks=callbacks_list, validation_data=it_test, validation_steps=2) #steps_per_epoch * batch_size = number_of_rows_in_train_data
 
 #Guardar modelo
 
