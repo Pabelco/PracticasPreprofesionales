@@ -1,12 +1,18 @@
 import tensorflow as tf
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
-from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog, QAction
-from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog, QAction, QLabel, QSizePolicy
+from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import pyqtSlot
+
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 import cv2
 import numpy as np
+import pickle
+import matplotlib.pyplot as plt #Eliminar al final?
+
+CATEGORIES = ["Geobacillus stearothermophilus", "Klebsiella aerogenes", "Micrococcus spp"]
 
 IMG_SIZE = 50
 #IMG_SIZE = 100
@@ -15,10 +21,76 @@ new_model = tf.keras.models.load_model('prueba.model')
 
 class Ui_MainWindow(QWidget):
 	def setupUi(self, MainWindow):
-		
-
 		MainWindow.setObjectName("MainWindow")
-		MainWindow.resize(433, 449)
+		MainWindow.resize(474, 534)
+		self.centralwidget = QtWidgets.QWidget(MainWindow)
+		self.centralwidget.setObjectName("centralwidget")
+		self.gridLayout_2 = QtWidgets.QGridLayout(self.centralwidget)
+		self.gridLayout_2.setObjectName("gridLayout_2")
+		self.gridLayout = QtWidgets.QGridLayout()
+		self.gridLayout.setSizeConstraint(QtWidgets.QLayout.SetDefaultConstraint)
+		self.gridLayout.setObjectName("gridLayout")
+		spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+		self.gridLayout.addItem(spacerItem, 0, 1, 1, 1)
+		self.pushButton = QtWidgets.QPushButton(self.centralwidget)
+		self.pushButton.setObjectName("pushButton")
+		self.pushButton.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+		self.gridLayout.addWidget(self.pushButton, 0, 2, 1, 1)
+
+		self.pushButton.clicked.connect(self.file_open)
+
+		openFile = QAction('&Abrir imagen', self)
+		openFile.setShortcut('Ctrl+O')
+		openFile.setStatusTip('Abrir imagen')
+		openFile.triggered.connect(self.file_open)
+
+
+		self.bacterium_name = QtWidgets.QLabel(self.centralwidget)
+		self.bacterium_name.setSizeIncrement(QtCore.QSize(0, 0))
+		font = QtGui.QFont()
+		font.setPointSize(12)
+
+		self.bacterium_name.setFont(font)
+		self.bacterium_name.setObjectName("bacterium_name")
+		self.bacterium_name.setAlignment(QtCore.Qt.AlignCenter)
+		self.bacterium_name.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+		self.gridLayout.addWidget(self.bacterium_name, 4, 1, 1, 1)
+
+		self.label = QtWidgets.QLabel(self.centralwidget)
+		self.label.setObjectName("label")
+		self.label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+		self.gridLayout.addWidget(self.label, 0, 0, 1, 1)
+		spacerItem1 = QtWidgets.QSpacerItem(20, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+		self.gridLayout.addItem(spacerItem1, 3, 1, 1, 1)
+		spacerItem2 = QtWidgets.QSpacerItem(20, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+		self.gridLayout.addItem(spacerItem2, 1, 1, 1, 1)
+		self.label_3 = QtWidgets.QLabel(self.centralwidget)
+		self.label_3.setText("")
+		self.label_3.setPixmap(QtGui.QPixmap("Resultados/0.jpg"))
+		self.label_3.setObjectName("label_3")
+		self.label_3.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+		self.gridLayout.addWidget(self.label_3, 2, 1, 1, 1)
+		self.gridLayout_2.addLayout(self.gridLayout, 0, 0, 1, 1)
+		MainWindow.setCentralWidget(self.centralwidget)
+		self.menubar = QtWidgets.QMenuBar(MainWindow)
+		self.menubar.setGeometry(QtCore.QRect(0, 0, 474, 21))
+		self.menubar.setObjectName("menubar")
+		self.menuArchivo = QtWidgets.QMenu(self.menubar)
+		self.menuArchivo.setObjectName("menuArchivo")
+		MainWindow.setMenuBar(self.menubar)
+		self.statusbar = QtWidgets.QStatusBar(MainWindow)
+		self.statusbar.setObjectName("statusbar")
+		MainWindow.setStatusBar(self.statusbar)
+		self.actionAbrir = QtWidgets.QAction(MainWindow)
+		self.actionAbrir.setObjectName("actionAbrir")
+		self.menuArchivo.addAction(self.actionAbrir)
+		self.menubar.addAction(self.menuArchivo.menuAction())
+
+		self.retranslateUi(MainWindow)
+		QtCore.QMetaObject.connectSlotsByName(MainWindow)
+	
+	'''
+	def setupUi(self, MainWindow):
 		self.centralwidget = QtWidgets.QWidget(MainWindow)
 		self.centralwidget.setObjectName("centralwidget")
 		self.label = QtWidgets.QLabel(self.centralwidget)
@@ -26,27 +98,30 @@ class Ui_MainWindow(QWidget):
 		self.label.setObjectName("label")
 		self.pushButton = QtWidgets.QPushButton(self.centralwidget)
 		self.pushButton.setGeometry(QtCore.QRect(290, 20, 111, 23))
+		self.pushButton.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 		self.pushButton.setObjectName("pushButton")
 
-		#self.pushButton.clicked.connect(self.on_click)
+		self.pushButton.clicked.connect(self.file_open)
 
-
-		openFile = QAction('&Open File', self)
+		openFile = QAction('&Abrir imagen', self)
 		openFile.setShortcut('Ctrl+O')
-		openFile.setStatusTip('Abrir archivo')
+		openFile.setStatusTip('Abrir imagen')
 		openFile.triggered.connect(self.file_open)
 
+		self.bacterium_image = QLabel(self)
+		self.bacterium_image.setGeometry(QtCore.QRect(30, 130, 371, 221))
+		self.bacterium_image.setObjectName("bacterium_image")
+		pixmap = QPixmap('Resultados/0.jpg')
+		self.bacterium_image.setPixmap(pixmap)
+		#self.resize(pixmap.width(), pixmap.height())
 
-		self.graphicsView = QtWidgets.QGraphicsView(self.centralwidget)
-		self.graphicsView.setGeometry(QtCore.QRect(30, 130, 371, 221))
-		self.graphicsView.setObjectName("graphicsView")
-		self.label_2 = QtWidgets.QLabel(self.centralwidget)
-		self.label_2.setGeometry(QtCore.QRect(110, 370, 241, 41))
-		self.label_2.setSizeIncrement(QtCore.QSize(0, 0))
+		self.bacterium_name = QtWidgets.QLabel(self.centralwidget)
+		self.bacterium_name.setGeometry(QtCore.QRect(110, 370, 241, 41))
+		self.bacterium_name.setSizeIncrement(QtCore.QSize(0, 0))
 		font = QtGui.QFont()
 		font.setPointSize(12)
-		self.label_2.setFont(font)
-		self.label_2.setObjectName("label_2")
+		self.bacterium_name.setFont(font)
+		self.bacterium_name.setObjectName("bacterium_name")
 		MainWindow.setCentralWidget(self.centralwidget)
 		self.menubar = QtWidgets.QMenuBar(MainWindow)
 		self.menubar.setGeometry(QtCore.QRect(0, 0, 433, 21))
@@ -65,20 +140,28 @@ class Ui_MainWindow(QWidget):
 
 		self.retranslateUi(MainWindow)
 		QtCore.QMetaObject.connectSlotsByName(MainWindow)
+	'''
 
 	def retranslateUi(self, MainWindow):
 		_translate = QtCore.QCoreApplication.translate
-		MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+		MainWindow.setWindowTitle(_translate("MainWindow", "Identificador de bacterias"))
 		self.label.setText(_translate("MainWindow", "Abrir imagen..."))
 		self.pushButton.setText(_translate("MainWindow", "Abrir"))
-		self.label_2.setText(_translate("MainWindow", "Nombre de la bacteria identificada"))
+		self.bacterium_name.setText(_translate("MainWindow", "Nombre de la bacteria identificada"))
 		self.menuArchivo.setTitle(_translate("MainWindow", "Archivo"))
 		self.actionAbrir.setText(_translate("MainWindow", "Abrir"))
+
+	def show_image(self, result):
+		print(result)
+		self.bacterium_name.setText(CATEGORIES[result])
+		if result == 0:
+			pass
+			#self.show_image(0)
 
 
 	def file_open(self):
 		# need to make name an tupple otherwise i had an error and app crashed
-		name, _ = QFileDialog.getOpenFileName(self, 'Open File', options=QFileDialog.DontUseNativeDialog)
+		name, _ = QFileDialog.getOpenFileName(self, 'Abrir imagen', options=QFileDialog.DontUseNativeDialog)
 
 		if not name:
 			return
@@ -98,19 +181,37 @@ class Ui_MainWindow(QWidget):
 				X.append(new_array)
 
 		X = np.array(X).reshape(-1, IMG_SIZE, IMG_SIZE, 3)
-		X = X/255.0
+		#X = X/255.0
 
-		predictions = new_model.predict([X])
+		pickle_in = open("X.pickle","rb")
+		X_train = pickle.load(pickle_in)
+
+		datagen = ImageDataGenerator(
+			featurewise_center=True,				#Setea la media del dataset a 0
+			featurewise_std_normalization=True,)		#Normaliza con desviacion estandard (divide cada input para su desviacion estandard
+		datagen.fit(X_train)
+
+		X = X.astype('float32')
+		X_final = datagen.standardize(X)
+
+		predictions = new_model.predict([X_final])
 		print(predictions)
+
+		result = 0
+		self.show_image(0)
+
+		'''
+		#Para imprimir las imagenes
+		for i in range(9):
+			plt.subplot(330 + 1 + i)
+			batch = X_final[i]
+			image = abs(batch * 255.0)	#Se multiplica por 255 porque antes se normalizo dividiendo para 255
+			image = image.astype('uint8')
+			plt.imshow(image)
+		plt.show()
+		'''
 		#print(np.argmax(predictions[0]))
 
-		#file = open(name, 'r')
-		#self.editor()
-		'''
-		with file:
-			text = file.read()
-			self.textEdit.setText(text)
-		'''
 
 '''
 class App(QWidget):
@@ -156,7 +257,6 @@ class App(QWidget):
 '''
 if __name__ == "__main__":
 	import sys
-	
 	app = QtWidgets.QApplication(sys.argv)
 	MainWindow = QtWidgets.QMainWindow()
 	ui = Ui_MainWindow()
