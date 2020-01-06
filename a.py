@@ -8,7 +8,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import cv2
 import numpy as np
 
-IMG_SIZE = 100
+IMG_SIZE = 50
+#IMG_SIZE = 100
 
 new_model = tf.keras.models.load_model('prueba.model')
 
@@ -32,17 +33,13 @@ class Ui_MainWindow(QWidget):
 
 		openFile = QAction('&Open File', self)
 		openFile.setShortcut('Ctrl+O')
-		openFile.setStatusTip('Open File')
+		openFile.setStatusTip('Abrir archivo')
 		openFile.triggered.connect(self.file_open)
 
 
 		self.graphicsView = QtWidgets.QGraphicsView(self.centralwidget)
 		self.graphicsView.setGeometry(QtCore.QRect(30, 130, 371, 221))
 		self.graphicsView.setObjectName("graphicsView")
-		self.progressBar = QtWidgets.QProgressBar(self.centralwidget)
-		self.progressBar.setGeometry(QtCore.QRect(30, 70, 381, 21))
-		self.progressBar.setProperty("value", 24)
-		self.progressBar.setObjectName("progressBar")
 		self.label_2 = QtWidgets.QLabel(self.centralwidget)
 		self.label_2.setGeometry(QtCore.QRect(110, 370, 241, 41))
 		self.label_2.setSizeIncrement(QtCore.QSize(0, 0))

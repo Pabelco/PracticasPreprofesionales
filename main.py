@@ -4,7 +4,7 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, Activation, Flatten
 from tensorflow.keras.layers import Conv2D, MaxPooling2D
-
+from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.utils import normalize
 
 from tensorflow.keras import optimizers
@@ -21,7 +21,7 @@ from tqdm import tqdm
 import random
 
 IMG_SIZE = 50
-IMG_SIZE = 100
+#IMG_SIZE = 100
 #IMG_SIZE = 800
 #IMG_SIZE_X = 600
 #IMG_SIZE_Y = 800
@@ -153,8 +153,8 @@ datagen_test = ImageDataGenerator(
     featurewise_center=False,				#Setea la media del dataset a 0
     featurewise_std_normalization=False,		#Normaliza con desviacion estandard (divide cada input para su desviacion estandard)
     rotation_range=20,
-    width_shift_range=0.2,
-    height_shift_range=0.2,
+    width_shift_range=0.1,
+    height_shift_range=0.1,
     horizontal_flip=True,
     vertical_flip=True,)
 
@@ -174,6 +174,51 @@ for i in range(9):
 	plt.imshow(image)
 #plt.show()
 ############################################################
+
+'''
+# checkpoint
+filepath = 'prueba.model'
+checkpoint = ModelCheckpoint(filepath, monitor='accuracy', verbose=1, save_best_only=True, mode='max')
+callbacks_list = [checkpoint]
+
+
+dense_layers = [0, 1, 2]
+layer_sizes = [64, 128, 256]
+conv_layers = [1, 2, 3]
+
+for dense_layer in dense_layers:
+    for layer_size in layer_sizes:
+        for conv_layer in conv_layers:
+            model = Sequential()
+
+            model.add(Conv2D(layer_size, (3, 3), input_shape=X.shape[1:]))
+            model.add(Activation('relu'))
+            model.add(MaxPooling2D(pool_size=(2, 2)))
+
+            for l in range(conv_layer-1):
+                model.add(Conv2D(layer_size, (3, 3)))
+                model.add(Activation('relu'))
+                model.add(MaxPooling2D(pool_size=(2, 2)))
+
+            model.add(Flatten())
+
+            for _ in range(dense_layer):
+                model.add(Dense(layer_size))
+                model.add(Activation('relu'))
+
+            model.add(Dense(1))
+            model.add(Activation('sigmoid'))
+
+            model.compile(loss='binary_crossentropy',
+                          optimizer='adam',
+                          metrics=['accuracy'],
+                          )
+
+            model.fit_generator(it, epochs=10, steps_per_epoch=2,
+            callbacks=callbacks_list,
+            validation_data=it_test,
+            validation_steps=2) #steps_per_epoch * batch_size = number_of_rows_in_train_data
+'''
 model = Sequential()
 
 model.add(Conv2D(64, (3, 3), input_shape=X.shape[1:]))
@@ -197,8 +242,7 @@ model.add(Dense(256))
 model.add(Activation('relu'))
 
 model.add(Dense(1))
-model.add(Activation('relu'))
-
+model.add(Activation('sigmoid'))
 
 
 opt = optimizers.Adam(lr=0.00001, decay=0.5 ,clipvalue=0.25)
@@ -206,13 +250,22 @@ model.compile(loss='binary_crossentropy',
 			  optimizer=opt,
 			  metrics=['accuracy'])
 
+
+# checkpoint
+#filepath = "weights-improvement-{epoch:02d}-{val_accuracy:.2f}.hdf5"
+filepath = 'prueba.model'
+#checkpoint = ModelCheckpoint(filepath, monitor='val_accuracy', verbose=1, save_best_only=True, mode='max') #Con val_accuracy maximo
+checkpoint = ModelCheckpoint(filepath, monitor='val_accuracy', verbose=1, save_best_only=True, mode='max') #Con accuracy maximo
+callbacks_list = [checkpoint]
+
 #Sin data augmentation
 #model.fit(X, y, batch_size=45, epochs=5, validation_split=0.2)
 
 #Con data augmentation
-historia = model.fit_generator(it, epochs=5, steps_per_epoch=2, validation_data=it_test, validation_steps=2) #steps_per_epoch * batch_size = number_of_rows_in_train_data
+historia = model.fit_generator(it, epochs=10, steps_per_epoch=2, callbacks=callbacks_list, validation_data=it_test, validation_steps=2) #steps_per_epoch * batch_size = number_of_rows_in_train_data
 
 #Guardar modelo
+
 #model.save('prueba.model')
 
 #Cargar modelo
