@@ -5,4 +5,5 @@ numpy
 matplotlib
 tqdm
 SciPy
+PyQt5
 #tensorflow-gpu

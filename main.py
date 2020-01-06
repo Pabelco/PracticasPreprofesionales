@@ -135,7 +135,6 @@ except Exception as e:
 	pickle_in = open("y_test.pickle","rb")
 	y_test = pickle.load(pickle_in)
 
-
 X = X/255.0
 #X = normalize(X, axis=-1, order=2)
 X_test = X_test/255.0
@@ -160,10 +159,10 @@ datagen_test = ImageDataGenerator(
     vertical_flip=True,)
 
 datagen.fit(X)
-it = datagen.flow(X, y, batch_size=2)
+it = datagen.flow(X, y, batch_size=45)
 
 datagen_test.fit(X_test)
-it_test = datagen.flow(X_test, y_test, batch_size=1)
+it_test = datagen.flow(X_test, y_test, batch_size=45)
 
 #Para graficar las imagenes generadas por data Augmentation
 
@@ -192,10 +191,7 @@ model.add(Activation('relu'))
 model.add(Dropout(0.25))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 
-
 model.add(Flatten())  # Convierte el feature maps 3D a un feature vectors 1D
-
-
 
 model.add(Dense(256))
 model.add(Activation('relu'))
@@ -205,17 +201,16 @@ model.add(Activation('relu'))
 
 
 
-
-opt = optimizers.Adam(lr=0.0000001, decay=0.5 ,clipvalue=0.25)
+opt = optimizers.Adam(lr=0.00001, decay=0.5 ,clipvalue=0.25)
 model.compile(loss='binary_crossentropy',
 			  optimizer=opt,
 			  metrics=['accuracy'])
 
 #Sin data augmentation
-#model.fit(X, y, batch_size=10, epochs=5, validation_split=0.2)
+#model.fit(X, y, batch_size=45, epochs=5, validation_split=0.2)
 
 #Con data augmentation
-historia = model.fit_generator(it, epochs=10, steps_per_epoch=12, validation_data=it_test, validation_steps=28) #steps_per_epoch * batch_size = number_of_rows_in_train_data
+historia = model.fit_generator(it, epochs=5, steps_per_epoch=2, validation_data=it_test, validation_steps=2) #steps_per_epoch * batch_size = number_of_rows_in_train_data
 
 #Guardar modelo
 #model.save('prueba.model')
