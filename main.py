@@ -135,14 +135,14 @@ except Exception as e:
 	pickle_in = open("y_test.pickle","rb")
 	y_test = pickle.load(pickle_in)
 
-X = X/255.0
+#X = X/255.0
 #X = normalize(X, axis=-1, order=2)
-X_test = X_test/255.0
+#X_test = X_test/255.0
 
 #Data augmentation
 datagen = ImageDataGenerator(
-    featurewise_center=False,				#Setea la media del dataset a 0
-    featurewise_std_normalization=False,		#Normaliza con desviacion estandard (divide cada input para su desviacion estandard)
+    featurewise_center=True,				#Setea la media del dataset a 0
+    featurewise_std_normalization=True,		#Normaliza con desviacion estandard (divide cada input para su desviacion estandard)
     rotation_range=20,
     width_shift_range=0.1,
     height_shift_range=0.1,
@@ -150,8 +150,8 @@ datagen = ImageDataGenerator(
     vertical_flip=True,)
 
 datagen_test = ImageDataGenerator(
-    featurewise_center=False,				#Setea la media del dataset a 0
-    featurewise_std_normalization=False,		#Normaliza con desviacion estandard (divide cada input para su desviacion estandard)
+    featurewise_center=True,				#Setea la media del dataset a 0
+    featurewise_std_normalization=True,		#Normaliza con desviacion estandard (divide cada input para su desviacion estandard)
     rotation_range=20,
     width_shift_range=0.1,
     height_shift_range=0.1,
