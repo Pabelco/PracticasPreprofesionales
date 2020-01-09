@@ -12,7 +12,8 @@ import numpy as np
 import pickle
 import matplotlib.pyplot as plt #Eliminar al final?
 
-CATEGORIES = ["Geobacillus stearothermophilus", "Klebsiella aerogenes", "Micrococcus spp"]
+#CATEGORIES = ["Geobacillus stearothermophilus", "Klebsiella aerogenes", "Micrococcus spp"]
+CATEGORIES = ["Bacillus", "E.coli", "K.aerogenes", "Micrococcus", "P.aeruginosa", "S.aureus", "S.typhi", "Staphylococcus"]
 
 IMG_SIZE = 50
 #IMG_SIZE = 100

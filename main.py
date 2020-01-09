@@ -30,8 +30,8 @@ IMG_SIZE = 50
 def create_training_data():
 	DATADIR = "./"
 
-	CATEGORIES = ["Geobacillus.stearothermophilus", "Klebsiella.aerogenes", "Micrococcus.sp"]
-	#CATEGORIES = ["Bacillus", "E.coli", "K.aerogenes", "Micrococcus", "P.aeruginosa", "S.aureus", "S.typhi", "Staphylococcus"]
+	#CATEGORIES = ["Geobacillus.stearothermophilus", "Klebsiella.aerogenes", "Micrococcus.sp"]
+	CATEGORIES = ["Bacillus", "E.coli", "K.aerogenes", "Micrococcus", "P.aeruginosa", "S.aureus", "S.typhi", "Staphylococcus"]
 
 	training_data = []
 	training_data_test = []
