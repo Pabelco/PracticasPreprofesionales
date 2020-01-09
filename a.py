@@ -152,7 +152,6 @@ class Ui_MainWindow(QWidget):
 		self.actionAbrir.setText(_translate("MainWindow", "Abrir"))
 
 	def show_image(self, result):
-		print(result)
 		self.bacterium_name.setText(CATEGORIES[result])
 		if result == 0:
 			pass
@@ -199,7 +198,8 @@ class Ui_MainWindow(QWidget):
 
 		result = 0
 		result = np.argmax(predictions[0])
-		self.show_image(0)
+		print(result)
+		self.show_image(result)
 
 		'''
 		#Para imprimir las imagenes
