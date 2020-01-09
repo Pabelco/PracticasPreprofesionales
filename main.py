@@ -31,6 +31,7 @@ def create_training_data():
 	DATADIR = "./"
 
 	CATEGORIES = ["Geobacillus.stearothermophilus", "Klebsiella.aerogenes", "Micrococcus.sp"]
+	#CATEGORIES = ["Bacillus", "E.coli", "K.aerogenes", "Micrococcus", "P.aeruginosa", "S.aureus", "S.typhi", "Staphylococcus"]
 
 	training_data = []
 	training_data_test = []
@@ -43,6 +44,7 @@ def create_training_data():
 		
 		for img in tqdm(os.listdir(path)):  # iterate over each image
 			try:
+				print(category)
 				img_array = cv2.imread(os.path.join(path,img) ,cv2.IMREAD_COLOR)  # convert to array
 
 				height = img_array.shape[0]
@@ -50,7 +52,7 @@ def create_training_data():
 
 				for j in range(3):
 					for i in range(4):
-						crop_img = img_array[i*height//4:(i+1)*height//4, j*width//3:(j+1)*width//3]
+						crop_img = img_array[i*height//8:(i+1)*height//8, j*width//6:(j+1)*width//6]
 
 						new_array = cv2.resize(crop_img, (IMG_SIZE, IMG_SIZE))  # resize to normalize data size
 						training_data.append([new_array, class_num])  # add this to our training_data
@@ -159,10 +161,10 @@ datagen_test = ImageDataGenerator(
     vertical_flip=True,)
 
 datagen.fit(X)
-it = datagen.flow(X, y, batch_size=50)
+it = datagen.flow(X, y, batch_size=400)
 
 datagen_test.fit(X_test)
-it_test = datagen.flow(X_test, y_test, batch_size=50)
+it_test = datagen.flow(X_test, y_test, batch_size=400)
 
 #Para graficar las imagenes generadas por data Augmentation
 
@@ -172,7 +174,7 @@ for i in range(9):
 	image = batch[0][0] * 255.0	#Se multiplica por 255 porque antes se normalizo dividiendo para 255
 	image = image.astype('uint8')
 	plt.imshow(image)
-#plt.show()
+plt.show()
 ############################################################
 
 '''
@@ -247,7 +249,7 @@ model.add(Activation('sigmoid'))
 
 opt = optimizers.Adam(lr=0.00001, decay=0.5 ,clipvalue=0.25)
 model.compile(loss='binary_crossentropy',
-			  optimizer=opt,
+			  optimizer='adam',
 			  metrics=['accuracy'])
 
 

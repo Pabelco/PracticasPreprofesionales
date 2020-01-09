@@ -175,7 +175,7 @@ class Ui_MainWindow(QWidget):
 
 		for j in range(3):
 			for i in range(4):
-				crop_img = img_array[i*height//4:(i+1)*height//4, j*width//3:(j+1)*width//3]
+				crop_img = img_array[i*height//8:(i+1)*height//8, j*width//6:(j+1)*width//6]
 
 				new_array = cv2.resize(crop_img, (IMG_SIZE, IMG_SIZE))  # resize to normalize data size
 				X.append(new_array)
@@ -198,6 +198,7 @@ class Ui_MainWindow(QWidget):
 		print(predictions)
 
 		result = 0
+		result = np.argmax(predictions[0])
 		self.show_image(0)
 
 		'''
