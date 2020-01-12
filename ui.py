@@ -103,10 +103,7 @@ class Ui_MainWindow(QWidget):
 
 	def show_image(self, result, probability):
 		self.bacterium_name.setText(CATEGORIES[result]+' '+"{0:.2f}".format(probability)+' %')
-		if result == 0:
-			pass
-			#self.show_image(0)
-
+		self.label_3.setPixmap(QtGui.QPixmap("Resultados/"+str(result)+".jpg"))
 
 	def file_open(self):
 		# need to make name an tupple otherwise i had an error and app crashed
