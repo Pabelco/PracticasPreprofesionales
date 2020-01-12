@@ -26,12 +26,11 @@ IMG_SIZE = 50
 #IMG_SIZE_X = 600
 #IMG_SIZE_Y = 800
 
+#CATEGORIES = ["Geobacillus.stearothermophilus", "Klebsiella.aerogenes", "Micrococcus.sp"]
+CATEGORIES = ["Bacillus", "E.coli", "K.aerogenes", "Micrococcus", "P.aeruginosa", "S.aureus", "S.typhi", "Staphylococcus"]
 
 def create_training_data():
 	DATADIR = "./"
-
-	#CATEGORIES = ["Geobacillus.stearothermophilus", "Klebsiella.aerogenes", "Micrococcus.sp"]
-	CATEGORIES = ["Bacillus", "E.coli", "K.aerogenes", "Micrococcus", "P.aeruginosa", "S.aureus", "S.typhi", "Staphylococcus"]
 
 	training_data = []
 	training_data_test = []
@@ -174,7 +173,7 @@ for i in range(9):
 	image = batch[0][0] * 255.0	#Se multiplica por 255 porque antes se normalizo dividiendo para 255
 	image = image.astype('uint8')
 	plt.imshow(image)
-plt.show()
+#plt.show()
 ############################################################
 
 '''
@@ -182,45 +181,8 @@ plt.show()
 filepath = 'prueba.model'
 checkpoint = ModelCheckpoint(filepath, monitor='accuracy', verbose=1, save_best_only=True, mode='max')
 callbacks_list = [checkpoint]
-
-
-dense_layers = [0, 1, 2]
-layer_sizes = [64, 128, 256]
-conv_layers = [1, 2, 3]
-
-for dense_layer in dense_layers:
-    for layer_size in layer_sizes:
-        for conv_layer in conv_layers:
-            model = Sequential()
-
-            model.add(Conv2D(layer_size, (3, 3), input_shape=X.shape[1:]))
-            model.add(Activation('relu'))
-            model.add(MaxPooling2D(pool_size=(2, 2)))
-
-            for l in range(conv_layer-1):
-                model.add(Conv2D(layer_size, (3, 3)))
-                model.add(Activation('relu'))
-                model.add(MaxPooling2D(pool_size=(2, 2)))
-
-            model.add(Flatten())
-
-            for _ in range(dense_layer):
-                model.add(Dense(layer_size))
-                model.add(Activation('relu'))
-
-            model.add(Dense(1))
-            model.add(Activation('sigmoid'))
-
-            model.compile(loss='binary_crossentropy',
-                          optimizer='adam',
-                          metrics=['accuracy'],
-                          )
-
-            model.fit_generator(it, epochs=10, steps_per_epoch=2,
-            callbacks=callbacks_list,
-            validation_data=it_test,
-            validation_steps=2) #steps_per_epoch * batch_size = number_of_rows_in_train_data
 '''
+
 model = Sequential()
 
 model.add(Conv2D(64, (3, 3), input_shape=X.shape[1:]))
@@ -244,11 +206,11 @@ model.add(Dense(256))
 model.add(Activation('relu'))
 
 model.add(Dense(1))
-model.add(Activation('sigmoid'))
+model.add(Activation('linear'))
 
 
-opt = optimizers.Adam(lr=0.00001, decay=0.5 ,clipvalue=0.25)
-model.compile(loss='binary_crossentropy',
+#opt = optimizers.Adam(lr=0.00001, decay=0.5 ,clipvalue=0.25)
+model.compile(loss='mean_squared_error',
 			  optimizer='adam',
 			  metrics=['accuracy'])
 
@@ -256,15 +218,15 @@ model.compile(loss='binary_crossentropy',
 # checkpoint
 #filepath = "weights-improvement-{epoch:02d}-{val_accuracy:.2f}.hdf5"
 filepath = 'prueba.model'
-#checkpoint = ModelCheckpoint(filepath, monitor='val_accuracy', verbose=1, save_best_only=True, mode='max') #Con val_accuracy maximo
-checkpoint = ModelCheckpoint(filepath, monitor='accuracy', verbose=1, save_best_only=True, mode='max') #Con accuracy maximo
+checkpoint = ModelCheckpoint(filepath, monitor='val_accuracy', verbose=1, save_best_only=True, mode='max') #Con val_accuracy maximo
+#checkpoint = ModelCheckpoint(filepath, monitor='accuracy', verbose=1, save_best_only=True, mode='max') #Con accuracy maximo
 callbacks_list = [checkpoint]
 
 #Sin data augmentation
 #model.fit(X, y, batch_size=45, epochs=5, validation_split=0.2)
 
 #Con data augmentation
-historia = model.fit_generator(it, epochs=10, steps_per_epoch=3, callbacks=callbacks_list, validation_data=it_test, validation_steps=2) #steps_per_epoch * batch_size = number_of_rows_in_train_data
+historia = model.fit_generator(it, epochs=10, steps_per_epoch=2, callbacks=callbacks_list, validation_data=it_test, validation_steps=2) #steps_per_epoch * batch_size = number_of_rows_in_train_data
 
 #Guardar modelo
 
