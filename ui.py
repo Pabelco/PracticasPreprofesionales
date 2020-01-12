@@ -1,3 +1,4 @@
+import math
 import tensorflow as tf
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
@@ -100,8 +101,8 @@ class Ui_MainWindow(QWidget):
 		self.menuArchivo.setTitle(_translate("MainWindow", "Archivo"))
 		self.actionAbrir.setText(_translate("MainWindow", "Abrir imagen"))
 
-	def show_image(self, result):
-		self.bacterium_name.setText(CATEGORIES[result])
+	def show_image(self, result, probability):
+		self.bacterium_name.setText(CATEGORIES[result]+' '+"{0:.2f}".format(probability)+' %')
 		if result == 0:
 			pass
 			#self.show_image(0)
@@ -129,7 +130,7 @@ class Ui_MainWindow(QWidget):
 				X.append(new_array)
 
 		X = np.array(X).reshape(-1, IMG_SIZE, IMG_SIZE, 3)
-		#X = X/255.0
+		
 
 		pickle_in = open("X.pickle","rb")
 		X_train = pickle.load(pickle_in)
@@ -140,21 +141,27 @@ class Ui_MainWindow(QWidget):
 		datagen.fit(X_train)
 
 		X = X.astype('float32')
-		X_final = datagen.standardize(X)
+		X_final = X/255.0
+		#X_final = datagen.standardize(X)
 
 		predictions = new_model.predict([X_final])
 		#predictions = new_model.predict_proba([X_final])
 		print(predictions)
 
-		for r in predictions:
-			result = np.argmax(r)
-			prob = r[0] - result
-			print('Result: ', result, 'Probability: ', prob)
-
-		result = 0
+		probs = {}
+		for i in range(len(predictions)):
+			for j in range(len(predictions[i])):
+				if j in probs:
+					probs[j] += predictions[i][j]
+				else:
+					probs[j] = predictions[i][j]
+				if i == len(predictions)-1:
+					probs[j] /= len(predictions[i])
+		probs = {k: v*100/sum(probs.values()) for k, v in sorted(probs.items(), reverse=True, key=lambda item: item[1])}
+		print(probs)
 		result = np.argmax(predictions[0])
 		#print(result)
-		self.show_image(result)
+		self.show_image(result, probs[0])
 
 		#print(np.argmax(predictions[0]))
 
