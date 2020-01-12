@@ -68,7 +68,7 @@ class Ui_MainWindow(QWidget):
 		self.gridLayout.addItem(spacerItem2, 1, 1, 1, 1)
 		self.label_3 = QtWidgets.QLabel(self.centralwidget)
 		self.label_3.setText("")
-		self.label_3.setPixmap(QtGui.QPixmap("Resultados/0.jpg"))
+		self.label_3.setPixmap(QtGui.QPixmap("Resultados/Logo.png"))
 		self.label_3.setObjectName("label_3")
 		self.label_3.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 		self.gridLayout.addWidget(self.label_3, 2, 1, 1, 1)
@@ -94,7 +94,7 @@ class Ui_MainWindow(QWidget):
 
 	def retranslateUi(self, MainWindow):
 		_translate = QtCore.QCoreApplication.translate
-		MainWindow.setWindowTitle(_translate("MainWindow", "Identificador de bacterias"))
+		MainWindow.setWindowTitle(_translate("MainWindow", "Deep Bacterium"))
 		self.label.setText(_translate("MainWindow", "Abrir imagen..."))
 		self.pushButton.setText(_translate("MainWindow", "Abrir"))
 		self.bacterium_name.setText(_translate("MainWindow", "Nombre de la bacteria identificada"))
@@ -122,8 +122,8 @@ class Ui_MainWindow(QWidget):
 		height = img_array.shape[0]
 		width = img_array.shape[1]
 
-		for j in range(3):
-			for i in range(4):
+		for j in range(6):
+			for i in range(8):
 				crop_img = img_array[i*height//8:(i+1)*height//8, j*width//6:(j+1)*width//6]
 
 				new_array = cv2.resize(crop_img, (IMG_SIZE, IMG_SIZE))  # resize to normalize data size
@@ -165,49 +165,6 @@ class Ui_MainWindow(QWidget):
 
 		#print(np.argmax(predictions[0]))
 
-
-'''
-class App(QWidget):
-	def __init__(self):
-		super().__init__()
-		self.title = 'PyQt5 file dialogs - pythonspot.com'
-		self.left = 10
-		self.top = 10
-		self.width = 640
-		self.height = 480
-		self.initUI()
-	
-	def initUI(self):
-		self.setWindowTitle(self.title)
-		self.setGeometry(self.left, self.top, self.width, self.height)
-		
-		self.openFileNameDialog()
-		self.openFileNamesDialog()
-		self.saveFileDialog()
-		
-		self.show()
-	
-	def openFileNameDialog(self):
-		options = QFileDialog.Options()
-		options |= QFileDialog.DontUseNativeDialog
-		fileName, _ = QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", "","All Files (*);;Python Files (*.py)", options=options)
-		if fileName:
-			print(fileName)
-	
-	def openFileNamesDialog(self):
-		options = QFileDialog.Options()
-		options |= QFileDialog.DontUseNativeDialog
-		files, _ = QFileDialog.getOpenFileNames(self,"QFileDialog.getOpenFileNames()", "","All Files (*);;Python Files (*.py)", options=options)
-		if files:
-			print(files)
-	
-	def saveFileDialog(self):
-		options = QFileDialog.Options()
-		options |= QFileDialog.DontUseNativeDialog
-		fileName, _ = QFileDialog.getSaveFileName(self,"QFileDialog.getSaveFileName()","","All Files (*);;Text Files (*.txt)", options=options)
-		if fileName:
-			print(fileName)
-'''
 if __name__ == "__main__":
 	import sys
 	app = QtWidgets.QApplication(sys.argv)

@@ -49,8 +49,8 @@ def create_training_data():
 				height = img_array.shape[0]
 				width = img_array.shape[1]
 
-				for j in range(3):
-					for i in range(4):
+				for j in range(6):
+					for i in range(8):
 						crop_img = img_array[i*height//8:(i+1)*height//8, j*width//6:(j+1)*width//6]
 
 						new_array = cv2.resize(crop_img, (IMG_SIZE, IMG_SIZE))  # resize to normalize data size
@@ -229,7 +229,7 @@ callbacks_list = [checkpoint]
 #model.fit(X, y, batch_size=45, epochs=5, validation_split=0.2)
 
 #Con data augmentation
-historia = model.fit_generator(it, epochs=30, steps_per_epoch=2, callbacks=callbacks_list, validation_data=it_test, validation_steps=2) #steps_per_epoch * batch_size = number_of_rows_in_train_data
+historia = model.fit_generator(it, epochs=30, steps_per_epoch=10, callbacks=callbacks_list, validation_data=it_test, validation_steps=10) #steps_per_epoch * batch_size = number_of_rows_in_train_data
 
 #Guardar modelo
 
