@@ -84,64 +84,12 @@ class Ui_MainWindow(QWidget):
 		MainWindow.setStatusBar(self.statusbar)
 		self.actionAbrir = QtWidgets.QAction(MainWindow)
 		self.actionAbrir.setObjectName("actionAbrir")
-		self.menuArchivo.addAction(self.actionAbrir)
-		self.menubar.addAction(self.menuArchivo.menuAction())
-
-		self.retranslateUi(MainWindow)
-		QtCore.QMetaObject.connectSlotsByName(MainWindow)
-	
-	'''
-	def setupUi(self, MainWindow):
-		self.centralwidget = QtWidgets.QWidget(MainWindow)
-		self.centralwidget.setObjectName("centralwidget")
-		self.label = QtWidgets.QLabel(self.centralwidget)
-		self.label.setGeometry(QtCore.QRect(22, 20, 261, 23))
-		self.label.setObjectName("label")
-		self.pushButton = QtWidgets.QPushButton(self.centralwidget)
-		self.pushButton.setGeometry(QtCore.QRect(290, 20, 111, 23))
-		self.pushButton.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-		self.pushButton.setObjectName("pushButton")
-
-		self.pushButton.clicked.connect(self.file_open)
-
-		openFile = QAction('&Abrir imagen', self)
-		openFile.setShortcut('Ctrl+O')
-		openFile.setStatusTip('Abrir imagen')
-		openFile.triggered.connect(self.file_open)
-
-		self.bacterium_image = QLabel(self)
-		self.bacterium_image.setGeometry(QtCore.QRect(30, 130, 371, 221))
-		self.bacterium_image.setObjectName("bacterium_image")
-		pixmap = QPixmap('Resultados/0.jpg')
-		self.bacterium_image.setPixmap(pixmap)
-		#self.resize(pixmap.width(), pixmap.height())
-
-		self.bacterium_name = QtWidgets.QLabel(self.centralwidget)
-		self.bacterium_name.setGeometry(QtCore.QRect(110, 370, 241, 41))
-		self.bacterium_name.setSizeIncrement(QtCore.QSize(0, 0))
-		font = QtGui.QFont()
-		font.setPointSize(12)
-		self.bacterium_name.setFont(font)
-		self.bacterium_name.setObjectName("bacterium_name")
-		MainWindow.setCentralWidget(self.centralwidget)
-		self.menubar = QtWidgets.QMenuBar(MainWindow)
-		self.menubar.setGeometry(QtCore.QRect(0, 0, 433, 21))
-		self.menubar.setObjectName("menubar")
-		self.menuArchivo = QtWidgets.QMenu(self.menubar)
-		self.menuArchivo.setObjectName("menuArchivo")
-		MainWindow.setMenuBar(self.menubar)
-		self.statusbar = QtWidgets.QStatusBar(MainWindow)
-		self.statusbar.setObjectName("statusbar")
-		MainWindow.setStatusBar(self.statusbar)
-		self.actionAbrir = QtWidgets.QAction(MainWindow)
-		self.actionAbrir.setObjectName("actionAbrir")
 		#self.menuArchivo.addAction(self.actionAbrir)
 		self.menuArchivo.addAction(openFile)
 		self.menubar.addAction(self.menuArchivo.menuAction())
 
 		self.retranslateUi(MainWindow)
 		QtCore.QMetaObject.connectSlotsByName(MainWindow)
-	'''
 
 	def retranslateUi(self, MainWindow):
 		_translate = QtCore.QCoreApplication.translate
@@ -150,7 +98,7 @@ class Ui_MainWindow(QWidget):
 		self.pushButton.setText(_translate("MainWindow", "Abrir"))
 		self.bacterium_name.setText(_translate("MainWindow", "Nombre de la bacteria identificada"))
 		self.menuArchivo.setTitle(_translate("MainWindow", "Archivo"))
-		self.actionAbrir.setText(_translate("MainWindow", "Abrir"))
+		self.actionAbrir.setText(_translate("MainWindow", "Abrir imagen"))
 
 	def show_image(self, result):
 		self.bacterium_name.setText(CATEGORIES[result])
@@ -179,6 +127,8 @@ class Ui_MainWindow(QWidget):
 
 				new_array = cv2.resize(crop_img, (IMG_SIZE, IMG_SIZE))  # resize to normalize data size
 				X.append(new_array)
+				break
+			break
 
 		X = np.array(X).reshape(-1, IMG_SIZE, IMG_SIZE, 3)
 		#X = X/255.0
@@ -195,23 +145,19 @@ class Ui_MainWindow(QWidget):
 		X_final = datagen.standardize(X)
 
 		predictions = new_model.predict([X_final])
+		#predictions = new_model.predict_proba([X_final])
 		print(predictions)
 
+		for r in predictions:
+			result = np.argmax(r)
+			prob = r[0] - result
+			print('Result: ', result, 'Probability: ', prob)
+
 		result = 0
-		result = np.argmax(predictions[0])
-		print(result)
+		result = np.argmax(predictions)
+		#print(result)
 		self.show_image(result)
 
-		'''
-		#Para imprimir las imagenes
-		for i in range(9):
-			plt.subplot(330 + 1 + i)
-			batch = X_final[i]
-			image = abs(batch * 255.0)	#Se multiplica por 255 porque antes se normalizo dividiendo para 255
-			image = image.astype('uint8')
-			plt.imshow(image)
-		plt.show()
-		'''
 		#print(np.argmax(predictions[0]))
 
 

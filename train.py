@@ -205,12 +205,12 @@ model.add(Flatten())  # Convierte el feature maps 3D a un feature vectors 1D
 model.add(Dense(256))
 model.add(Activation('relu'))
 
-model.add(Dense(1))
-model.add(Activation('linear'))
+model.add(Dense(len(CATEGORIES)-1))
+model.add(Activation('softmax'))
 
 
 #opt = optimizers.Adam(lr=0.00001, decay=0.5 ,clipvalue=0.25)
-model.compile(loss='mean_squared_error',
+model.compile(loss='sparse_categorical_crossentropy',
 			  optimizer='adam',
 			  metrics=['accuracy'])
 
