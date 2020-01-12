@@ -205,7 +205,7 @@ model.add(Flatten())  # Convierte el feature maps 3D a un feature vectors 1D
 model.add(Dense(256))
 model.add(Activation('relu'))
 
-model.add(Dense(len(CATEGORIES)-1))
+model.add(Dense(len(CATEGORIES)))
 model.add(Activation('softmax'))
 
 

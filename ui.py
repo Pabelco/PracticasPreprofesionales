@@ -127,8 +127,6 @@ class Ui_MainWindow(QWidget):
 
 				new_array = cv2.resize(crop_img, (IMG_SIZE, IMG_SIZE))  # resize to normalize data size
 				X.append(new_array)
-				break
-			break
 
 		X = np.array(X).reshape(-1, IMG_SIZE, IMG_SIZE, 3)
 		#X = X/255.0
@@ -154,7 +152,7 @@ class Ui_MainWindow(QWidget):
 			print('Result: ', result, 'Probability: ', prob)
 
 		result = 0
-		result = np.argmax(predictions)
+		result = np.argmax(predictions[0])
 		#print(result)
 		self.show_image(result)
 
