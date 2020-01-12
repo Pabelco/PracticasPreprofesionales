@@ -39,6 +39,12 @@ class Ui_MainWindow(QWidget):
 		self.pushButton.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 		self.gridLayout.addWidget(self.pushButton, 0, 2, 1, 1)
 
+		#Definiendo las proporciones de la pantalla
+		self.gridLayout.setRowStretch(5, 1)
+		self.gridLayout.setColumnStretch(2, 2)
+		self.gridLayout.setColumnStretch(1, 7)
+		self.gridLayout.setColumnStretch(0, 2)
+
 		self.pushButton.clicked.connect(self.file_open)
 
 		openFile = QAction('&Abrir imagen', self)
@@ -51,12 +57,22 @@ class Ui_MainWindow(QWidget):
 		self.bacterium_name.setSizeIncrement(QtCore.QSize(0, 0))
 		font = QtGui.QFont()
 		font.setPointSize(12)
-
 		self.bacterium_name.setFont(font)
 		self.bacterium_name.setObjectName("bacterium_name")
 		self.bacterium_name.setAlignment(QtCore.Qt.AlignCenter)
 		self.bacterium_name.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 		self.gridLayout.addWidget(self.bacterium_name, 4, 1, 1, 1)
+
+		self.other_bacterium = QtWidgets.QLabel(self.centralwidget)
+		self.other_bacterium.setText("")
+		self.other_bacterium.setObjectName("other_bacterium")
+		self.other_bacterium.setAlignment(QtCore.Qt.AlignCenter)
+		self.other_bacterium.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+		self.gridLayout.addWidget(self.other_bacterium, 5, 1, 1, 1)
+
+		self.other = QtWidgets.QLabel(self.centralwidget)
+		self.other.setObjectName("other")
+		self.gridLayout.addWidget(self.other, 5, 0, 1, 1)
 
 		self.label = QtWidgets.QLabel(self.centralwidget)
 		self.label.setObjectName("label")
@@ -70,6 +86,7 @@ class Ui_MainWindow(QWidget):
 		self.label_3.setText("")
 		self.label_3.setPixmap(QtGui.QPixmap("Resultados/Logo.png"))
 		self.label_3.setObjectName("label_3")
+		self.label_3.setAlignment(QtCore.Qt.AlignCenter)
 		self.label_3.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 		self.gridLayout.addWidget(self.label_3, 2, 1, 1, 1)
 		self.gridLayout_2.addLayout(self.gridLayout, 0, 0, 1, 1)
@@ -95,18 +112,15 @@ class Ui_MainWindow(QWidget):
 	def retranslateUi(self, MainWindow):
 		_translate = QtCore.QCoreApplication.translate
 		MainWindow.setWindowTitle(_translate("MainWindow", "Deep Bacterium"))
+		MainWindow.setWindowIcon(QtGui.QIcon('icon.png'))
 		self.label.setText(_translate("MainWindow", "Abrir imagen..."))
 		self.pushButton.setText(_translate("MainWindow", "Abrir"))
 		self.bacterium_name.setText(_translate("MainWindow", "Nombre de la bacteria identificada"))
+		self.other.setText(_translate("MainWindow", "Otros:"))
 		self.menuArchivo.setTitle(_translate("MainWindow", "Archivo"))
 		self.actionAbrir.setText(_translate("MainWindow", "Abrir imagen"))
 
-	def show_image(self, result, probability):
-		self.bacterium_name.setText(CATEGORIES[result]+' '+"{0:.2f}".format(probability)+' %')
-		self.label_3.setPixmap(QtGui.QPixmap("Resultados/"+str(result)+".jpg"))
-
 	def file_open(self):
-		# need to make name an tupple otherwise i had an error and app crashed
 		name, _ = QFileDialog.getOpenFileName(self, 'Abrir imagen', options=QFileDialog.DontUseNativeDialog)
 
 		if not name:
@@ -129,6 +143,7 @@ class Ui_MainWindow(QWidget):
 		X = np.array(X).reshape(-1, IMG_SIZE, IMG_SIZE, 3)
 		
 
+		'''
 		pickle_in = open("X.pickle","rb")
 		X_train = pickle.load(pickle_in)
 
@@ -136,14 +151,13 @@ class Ui_MainWindow(QWidget):
 			featurewise_center=True,				#Setea la media del dataset a 0
 			featurewise_std_normalization=True,)		#Normaliza con desviacion estandard (divide cada input para su desviacion estandard
 		datagen.fit(X_train)
+		'''
 
 		X = X.astype('float32')
 		X_final = X/255.0
 		#X_final = datagen.standardize(X)
 
 		predictions = new_model.predict([X_final])
-		#predictions = new_model.predict_proba([X_final])
-		print(predictions)
 
 		probs = {}
 		for i in range(len(predictions)):
@@ -154,13 +168,18 @@ class Ui_MainWindow(QWidget):
 					probs[j] = predictions[i][j]
 				if i == len(predictions)-1:
 					probs[j] /= len(predictions[i])
-		probs = {k: v*100/sum(probs.values()) for k, v in sorted(probs.items(), reverse=True, key=lambda item: item[1])}
-		print(probs)
-		result = np.argmax(predictions[0])
-		#print(result)
-		self.show_image(result, probs[0])
+		probs = [[k, v*100/sum(probs.values())] for k, v in sorted(probs.items(), reverse=True, key=lambda item: item[1])]
+		#result = np.argmax(predictions[0])
+		result = probs[0][0]
+		self.bacterium_name.setText(CATEGORIES[result]+' '+"{0:.2f}".format(probs[0][1])+' %')
+		self.label_3.setPixmap(QtGui.QPixmap("Resultados/"+str(result)+".jpg"))
 
-		#print(np.argmax(predictions[0]))
+		self.other_bacterium.setText('')
+		for i in range(1,len(probs)):
+			separator = ''
+			if self.other_bacterium.text() != '':
+				separator = ', '
+			self.other_bacterium.setText(self.other_bacterium.text()+separator+CATEGORIES[probs[i][0]]+' '+"{0:.2f}".format(probs[i][1])+' %')
 
 if __name__ == "__main__":
 	import sys
