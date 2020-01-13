@@ -1,4 +1,3 @@
-import math
 import tensorflow as tf
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
@@ -10,8 +9,7 @@ from PyQt5.QtCore import pyqtSlot
 from PyQt5 import QtCore, QtGui, QtWidgets
 import cv2
 import numpy as np
-import pickle
-import matplotlib.pyplot as plt #Eliminar al final?
+#import pickle
 
 #CATEGORIES = ["Geobacillus stearothermophilus", "Klebsiella aerogenes", "Micrococcus spp"]
 CATEGORIES = ["Bacillus", "E.coli", "K.aerogenes", "Micrococcus", "P.aeruginosa", "S.aureus", "S.typhi", "Staphylococcus"]
@@ -125,7 +123,6 @@ class Ui_MainWindow(QWidget):
 
 		if not name:
 			return
-
 
 		X = []
 		img_array = cv2.imread(name ,cv2.IMREAD_COLOR)
