@@ -145,22 +145,22 @@ X_test = X_test/255.0
 
 #Data augmentation
 datagen = ImageDataGenerator(
-    featurewise_center=False,				#Setea la media del dataset a 0
-    featurewise_std_normalization=False,		#Normaliza con desviacion estandard (divide cada input para su desviacion estandard)
-    rotation_range=20,
-    width_shift_range=0.1,
-    height_shift_range=0.1,
-    horizontal_flip=True,
-    vertical_flip=True,)
+	featurewise_center=False,				#Setea la media del dataset a 0
+	featurewise_std_normalization=False,		#Normaliza con desviacion estandard (divide cada input para su desviacion estandard)
+	rotation_range=20,
+	width_shift_range=0.1,
+	height_shift_range=0.1,
+	horizontal_flip=True,
+	vertical_flip=True,)
 
 datagen_test = ImageDataGenerator(
-    featurewise_center=False,				#Setea la media del dataset a 0
-    featurewise_std_normalization=False,		#Normaliza con desviacion estandard (divide cada input para su desviacion estandard)
-    rotation_range=20,
-    width_shift_range=0.1,
-    height_shift_range=0.1,
-    horizontal_flip=True,
-    vertical_flip=True,)
+	featurewise_center=False,				#Setea la media del dataset a 0
+	featurewise_std_normalization=False,		#Normaliza con desviacion estandard (divide cada input para su desviacion estandard)
+	rotation_range=20,
+	width_shift_range=0.1,
+	height_shift_range=0.1,
+	horizontal_flip=True,
+	vertical_flip=True,)
 
 datagen.fit(X)
 it = datagen.flow(X, y, batch_size=400)

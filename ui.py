@@ -119,65 +119,68 @@ class Ui_MainWindow(QWidget):
 		self.actionAbrir.setText(_translate("MainWindow", "Abrir imagen"))
 
 	def file_open(self):
-		name, _ = QFileDialog.getOpenFileName(self, 'Abrir imagen', options=QFileDialog.DontUseNativeDialog)
+		try:
+			name, _ = QFileDialog.getOpenFileName(self, 'Abrir imagen', options=QFileDialog.DontUseNativeDialog)
 
-		if not name:
-			return
+			if not name:
+				return
 
-		X = []
-		img_array = cv2.imread(name ,cv2.IMREAD_COLOR)
+			X = []
+			img_array = cv2.imread(name ,cv2.IMREAD_COLOR)
 
-		height = img_array.shape[0]
-		width = img_array.shape[1]
+			height = img_array.shape[0]
+			width = img_array.shape[1]
 
-		for j in range(6):
-			for i in range(8):
-				crop_img = img_array[i*height//8:(i+1)*height//8, j*width//6:(j+1)*width//6]
+			for j in range(6):
+				for i in range(8):
+					crop_img = img_array[i*height//8:(i+1)*height//8, j*width//6:(j+1)*width//6]
 
-				new_array = cv2.resize(crop_img, (IMG_SIZE, IMG_SIZE))  # resize to normalize data size
-				X.append(new_array)
+					new_array = cv2.resize(crop_img, (IMG_SIZE, IMG_SIZE))  # resize to normalize data size
+					X.append(new_array)
 
-		X = np.array(X).reshape(-1, IMG_SIZE, IMG_SIZE, 3)
-		
+			X = np.array(X).reshape(-1, IMG_SIZE, IMG_SIZE, 3)
+			
 
-		'''
-		pickle_in = open("X.pickle","rb")
-		X_train = pickle.load(pickle_in)
+			'''
+			pickle_in = open("X.pickle","rb")
+			X_train = pickle.load(pickle_in)
 
-		datagen = ImageDataGenerator(
-			featurewise_center=True,				#Setea la media del dataset a 0
-			featurewise_std_normalization=True,)		#Normaliza con desviacion estandard (divide cada input para su desviacion estandard
-		datagen.fit(X_train)
-		'''
+			datagen = ImageDataGenerator(
+				featurewise_center=True,				#Setea la media del dataset a 0
+				featurewise_std_normalization=True,)		#Normaliza con desviacion estandard (divide cada input para su desviacion estandard
+			datagen.fit(X_train)
+			'''
 
-		X = X.astype('float32')
-		X_final = X/255.0
-		#X_final = datagen.standardize(X)
+			X = X.astype('float32')
+			X_final = X/255.0
+			#X_final = datagen.standardize(X)
 
-		predictions = new_model.predict([X_final])
+			predictions = new_model.predict([X_final])
 
-		probs = {}
-		for i in range(len(predictions)):
-			for j in range(len(predictions[i])):
-				if j in probs:
-					probs[j] += predictions[i][j]
-				else:
-					probs[j] = predictions[i][j]
-				if i == len(predictions)-1:
-					probs[j] /= len(predictions[i])
-		probs = [[k, v*100/sum(probs.values())] for k, v in sorted(probs.items(), reverse=True, key=lambda item: item[1])]
-		#result = np.argmax(predictions[0])
-		result = probs[0][0]
-		self.bacterium_name.setText(CATEGORIES[result]+' '+"{0:.2f}".format(probs[0][1])+' %')
-		self.label_3.setPixmap(QtGui.QPixmap("Resultados/"+str(result)+".jpg"))
+			probs = {}
+			for i in range(len(predictions)):
+				for j in range(len(predictions[i])):
+					if j in probs:
+						probs[j] += predictions[i][j]
+					else:
+						probs[j] = predictions[i][j]
+					if i == len(predictions)-1:
+						probs[j] /= len(predictions[i])
+			probs = [[k, v*100/sum(probs.values())] for k, v in sorted(probs.items(), reverse=True, key=lambda item: item[1])]
+			#result = np.argmax(predictions[0])
+			result = probs[0][0]
+			self.bacterium_name.setText(CATEGORIES[result]+' '+"{0:.2f}".format(probs[0][1])+' %')
+			self.label_3.setPixmap(QtGui.QPixmap("Resultados/"+str(result)+".jpg"))
 
-		self.other_bacterium.setText('')
-		for i in range(1,len(probs)):
-			separator = ''
-			if self.other_bacterium.text() != '':
-				separator = ', '
-			self.other_bacterium.setText(self.other_bacterium.text()+separator+CATEGORIES[probs[i][0]]+' '+"{0:.2f}".format(probs[i][1])+' %')
-
+			self.other_bacterium.setText('')
+			for i in range(1,len(probs)):
+				separator = ''
+				if self.other_bacterium.text() != '':
+					separator = ', '
+				self.other_bacterium.setText(self.other_bacterium.text()+separator+CATEGORIES[probs[i][0]]+' '+"{0:.2f}".format(probs[i][1])+' %')
+		except Exception as e:
+			pass
+			
 if __name__ == "__main__":
 	import sys
 	app = QtWidgets.QApplication(sys.argv)
