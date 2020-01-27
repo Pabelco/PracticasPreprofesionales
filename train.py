@@ -43,7 +43,6 @@ def create_training_data():
 		
 		for img in tqdm(os.listdir(path)):  # iterate over each image
 			try:
-				print(category)
 				img_array = cv2.imread(os.path.join(path,img) ,cv2.IMREAD_COLOR)  # convert to array
 
 				height = img_array.shape[0]
@@ -55,7 +54,7 @@ def create_training_data():
 
 						new_array = cv2.resize(crop_img, (IMG_SIZE, IMG_SIZE))  # resize to normalize data size
 
-						ret,thresh1 = cv2.threshold(cv2.cvtColor(new_array, cv2.COLOR_BGR2GRAY),170,255,cv2.THRESH_BINARY)
+						ret,thresh1 = cv2.threshold(cv2.cvtColor(new_array, cv2.COLOR_BGR2GRAY),190,255,cv2.THRESH_BINARY)
 						count_white = 0
 						for j in thresh1:
 							for i in j:
@@ -66,7 +65,6 @@ def create_training_data():
 
 						#cv2.imshow("cropped_"+str(i)+'_'+str(j), new_array)
 			except Exception as e:  # in the interest in keeping the output clean...
-				raise
 				print(e)
 				pass
 			#except OSError as e:
@@ -74,6 +72,7 @@ def create_training_data():
 			#except Exception as e:
 			#	print("general exception", e, os.path.join(path,img))
 
+	print("Traiig data: ",len(training_data))
 	# Si no se desordena mandaria primero todas las de una clase
 	random.shuffle(training_data)
 

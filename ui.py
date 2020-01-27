@@ -136,24 +136,25 @@ class Ui_MainWindow(QWidget):
 					crop_img = img_array[i*height//8:(i+1)*height//8, j*width//6:(j+1)*width//6]
 
 					new_array = cv2.resize(crop_img, (IMG_SIZE, IMG_SIZE))  # resize to normalize data size
-					X.append(new_array)
 
+					_,thresh1 = cv2.threshold(cv2.cvtColor(new_array, cv2.COLOR_BGR2GRAY),190,255,cv2.THRESH_BINARY)
+					count_white = 0
+					for t in thresh1:
+						for h in t:
+							if h == 255:
+								count_white += 1
+					if count_white*100/(IMG_SIZE*IMG_SIZE) < 90:
+						X.append(new_array)
+
+			if not X:
+				self.bacterium_name.setText('No se pudo procesar la imagen')
+				self.label_3.setPixmap(QtGui.QPixmap("Resultados/Logo.png"))
+				self.other_bacterium.setText('')
+				return
 			X = np.array(X).reshape(-1, IMG_SIZE, IMG_SIZE, 3)
-			
-
-			'''
-			pickle_in = open("X.pickle","rb")
-			X_train = pickle.load(pickle_in)
-
-			datagen = ImageDataGenerator(
-				featurewise_center=True,				#Setea la media del dataset a 0
-				featurewise_std_normalization=True,)		#Normaliza con desviacion estandard (divide cada input para su desviacion estandard
-			datagen.fit(X_train)
-			'''
 
 			X = X.astype('float32')
 			X_final = X/255.0
-			#X_final = datagen.standardize(X)
 
 			predictions = new_model.predict([X_final])
 
@@ -167,7 +168,6 @@ class Ui_MainWindow(QWidget):
 					if i == len(predictions)-1:
 						probs[j] /= len(predictions[i])
 			probs = [[k, v*100/sum(probs.values())] for k, v in sorted(probs.items(), reverse=True, key=lambda item: item[1])]
-			#result = np.argmax(predictions[0])
 			result = probs[0][0]
 			self.bacterium_name.setText(CATEGORIES[result]+' '+"{0:.2f}".format(probs[0][1])+' %')
 			self.label_3.setPixmap(QtGui.QPixmap("Resultados/"+str(result)+".jpg"))
@@ -179,7 +179,9 @@ class Ui_MainWindow(QWidget):
 					separator = ', '
 				self.other_bacterium.setText(self.other_bacterium.text()+separator+CATEGORIES[probs[i][0]]+' '+"{0:.2f}".format(probs[i][1])+' %')
 		except Exception as e:
-			pass
+			self.bacterium_name.setText('No se pudo procesar la imagen')
+			self.label_3.setPixmap(QtGui.QPixmap("Resultados/Logo.png"))
+			self.other_bacterium.setText('')
 			
 if __name__ == "__main__":
 	import sys
