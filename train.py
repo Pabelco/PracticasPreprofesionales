@@ -72,7 +72,7 @@ def create_training_data():
 			#except Exception as e:
 			#	print("general exception", e, os.path.join(path,img))
 
-	print("Traiig data: ",len(training_data))
+	print("Trainig data: ",len(training_data))
 	# Si no se desordena mandaria primero todas las de una clase
 	random.shuffle(training_data)
 
