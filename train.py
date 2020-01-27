@@ -54,7 +54,15 @@ def create_training_data():
 						crop_img = img_array[i*height//8:(i+1)*height//8, j*width//6:(j+1)*width//6]
 
 						new_array = cv2.resize(crop_img, (IMG_SIZE, IMG_SIZE))  # resize to normalize data size
-						training_data.append([new_array, class_num])  # add this to our training_data
+
+						ret,thresh1 = cv2.threshold(cv2.cvtColor(new_array, cv2.COLOR_BGR2GRAY),170,255,cv2.THRESH_BINARY)
+						count_white = 0
+						for j in thresh1:
+							for i in j:
+								if i == 255:
+									count_white += 1
+						if count_white*100/(IMG_SIZE*IMG_SIZE) < 90:		#Si los pixeles blancos son mas del 90% se descarta la imagen porque no es representativa
+							training_data.append([new_array, class_num])  # add this to our training_data
 
 						#cv2.imshow("cropped_"+str(i)+'_'+str(j), new_array)
 			except Exception as e:  # in the interest in keeping the output clean...
