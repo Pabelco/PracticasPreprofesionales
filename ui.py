@@ -143,7 +143,7 @@ class Ui_MainWindow(QWidget):
 						for h in t:
 							if h == 255:
 								count_white += 1
-					if count_white*100/(IMG_SIZE*IMG_SIZE) < 90:
+					if count_white*100/(IMG_SIZE*IMG_SIZE) < 95:
 						X.append(new_array)
 
 			if not X:

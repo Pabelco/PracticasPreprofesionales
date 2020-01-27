@@ -33,8 +33,6 @@ def create_training_data():
 	DATADIR = "./"
 
 	training_data = []
-	training_data_test = []
-
 	for category in CATEGORIES:
 		
 		path = os.path.join(DATADIR,category)  # path
@@ -54,14 +52,28 @@ def create_training_data():
 
 						new_array = cv2.resize(crop_img, (IMG_SIZE, IMG_SIZE))  # resize to normalize data size
 
-						ret,thresh1 = cv2.threshold(cv2.cvtColor(new_array, cv2.COLOR_BGR2GRAY),190,255,cv2.THRESH_BINARY)
+						_,thresh1 = cv2.threshold(cv2.cvtColor(new_array, cv2.COLOR_BGR2GRAY),190,255,cv2.THRESH_BINARY)
+
 						count_white = 0
 						for j in thresh1:
 							for i in j:
 								if i == 255:
 									count_white += 1
-						if count_white*100/(IMG_SIZE*IMG_SIZE) < 90:		#Si los pixeles blancos son mas del 90% se descarta la imagen porque no es representativa
+						if count_white*100/(IMG_SIZE*IMG_SIZE) < 95:		#Si los pixeles blancos son mas del 90% se descarta la imagen porque no es representativa
 							training_data.append([new_array, class_num])  # add this to our training_data
+						else:
+							#para ver las imagees que se descartan
+							'''
+							print(count_white*100/(IMG_SIZE*IMG_SIZE))
+							for h in range(2):
+								plt.subplot(330 + 2 + (h*2))
+								plt.imshow(new_array)
+
+								plt.subplot(330 + 2 + (h*2)-1)
+								plt.imshow(thresh1)
+							plt.show()
+							'''
+							pass
 
 						#cv2.imshow("cropped_"+str(i)+'_'+str(j), new_array)
 			except Exception as e:  # in the interest in keeping the output clean...
@@ -177,12 +189,16 @@ it_test = datagen.flow(X_test, y_test, batch_size=400)
 
 #Para graficar las imagenes generadas por data Augmentation
 
-for i in range(9):
-	plt.subplot(330 + 1 + i)
+for i in range(4):
+	plt.subplot(330 + 2 + (i*2))
 	batch = it.next()
 	image = batch[0][0] * 255.0	#Se multiplica por 255 porque antes se normalizo dividiendo para 255
 	image = image.astype('uint8')
 	plt.imshow(image)
+
+	_,thresh1 = cv2.threshold(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY),190,255,cv2.THRESH_BINARY)
+	plt.subplot(330 + 2 + (i*2)-1)
+	plt.imshow(thresh1)
 #plt.show()
 ############################################################
 
@@ -236,7 +252,7 @@ callbacks_list = [checkpoint]
 #model.fit(X, y, batch_size=45, epochs=5, validation_split=0.2)
 
 #Con data augmentation
-historia = model.fit_generator(it, epochs=30, steps_per_epoch=10, callbacks=callbacks_list, validation_data=it_test, validation_steps=10) #steps_per_epoch * batch_size = number_of_rows_in_train_data
+historia = model.fit_generator(it, epochs=30, steps_per_epoch=15, callbacks=callbacks_list, validation_data=it_test, validation_steps=10) #steps_per_epoch * batch_size = number_of_rows_in_train_data
 
 #Guardar modelo
 
