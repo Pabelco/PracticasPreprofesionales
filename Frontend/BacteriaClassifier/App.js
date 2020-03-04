@@ -2,8 +2,8 @@ import * as React from 'react';
 import { StyleSheet, Button, Image, View} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
-import Constants from 'expo-constants';
-import * as Permissions from 'expo-permissions';
+// import Constants from 'expo-constants';
+// import * as Permissions from 'expo-permissions';
 import { SplashScreen } from 'expo';
 
 SplashScreen.preventAutoHide();
@@ -48,17 +48,33 @@ export default class PicturePicker extends React.Component {
   }
 
   componentDidMount() {
-    this.getPermissionAsync();
+    // this.getPermissionAsync();
+    this.getPermissionCameraRollAsync();
+    this.getPermissionCameraAsync();
     console.log('Permits granted');
   }
 
-  getPermissionAsync = async () => {
-    if (Constants.platform.ios) {
-      const { statusCamera } = await Permissions.askAsync(Permissions.CAMERA);
-      const { statusCameraRoll } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
-      if (statusCameraRoll || statusCamera !== 'granted') {
-        alert('Sorry, we need the camera and camera roll permissions');
-      }
+  // getPermissionAsync = async () => {
+  //   if (Constants.platform.ios) {
+  //     const { statusCamera } = await Permissions.askAsync(Permissions.CAMERA);
+  //     const { statusCameraRoll } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+  //     if (statusCameraRoll || statusCamera !== 'granted') {
+  //       alert('Sorry, we need the camera and camera roll permissions');
+  //     }
+  //   }
+  // }
+
+  getPermissionCameraRollAsync = async () => {
+    let permissionResult = await ImagePicker.requestCameraRollPermissionsAsync();
+    if (permissionResult.granted === false) {
+      alert('Permission to access camera roll is required!');
+    }
+  }
+
+  getPermissionCameraAsync = async () => {
+    let permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+    if (permissionResult.granted === false) {
+      alert('Permission to access camera is required!');
     }
   }
 
@@ -128,17 +144,3 @@ const styles = StyleSheet.create({
     marginBottom: 25,
   },
 });
-
-
-// import React from 'react';
-// import { StyleSheet, Text, View } from 'react-native';
-
-// export default function App() {
-//   return (
-//     <View style={styles.container}>
-//       <Text>Open up App.js to start working on your app!</Text>
-//     </View>
-//   );
-// }
-
-
