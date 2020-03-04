@@ -1,6 +1,7 @@
 import * as React from 'react';
-import { Button, Image, View, TouchableOpacity} from 'react-native';
+import { StyleSheet, Button, Image, View} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { LinearGradient } from 'expo-linear-gradient';
 import Constants from 'expo-constants';
 import * as Permissions from 'expo-permissions';
 import { SplashScreen } from 'expo';
@@ -17,24 +18,38 @@ export default class PicturePicker extends React.Component {
     let { image } = this.state;
 
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <Button
-          title="Pick an image from camera roll"
-          onPress={this._pickImage}
+      <View style={styles.viewContainer}>
+        <LinearGradient
+          colors={['rgba(23,113,178,1)', 'transparent']}
+          style={styles.gradientContainer}
         />
-        <Button
-          title="Take a picture"
-          onPress={this._takePicture}
-        />
+        <View>
+          <Image source={require('./assets/bacteria.png')} style={styles.iconContainer}/>
+        </View>
+        <View style={styles.buttonContainer}>
+          <Button
+            title="Pick an image from camera roll"
+            onPress={this._pickImage}
+            color="black"
+          />
+        </View>
+        <View style={styles.buttonContainer}>
+          <Button
+            title="Take a picture"
+            onPress={this._takePicture}
+            color="black"
+          />
+        </View>
         {image &&
-          <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />}
+          <Image source={{ uri: image }} style={styles.imgContainer} 
+        />}
       </View>
     );
   }
 
   componentDidMount() {
     this.getPermissionAsync();
-    console.log('Hi');
+    console.log('Permits granted');
   }
 
   getPermissionAsync = async () => {
@@ -42,7 +57,7 @@ export default class PicturePicker extends React.Component {
       const { statusCamera } = await Permissions.askAsync(Permissions.CAMERA);
       const { statusCameraRoll } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
       if (statusCameraRoll || statusCamera !== 'granted') {
-        alert('Sorry, we need camera and camera roll permissions to make this work!');
+        alert('Sorry, we need the camera and camera roll permissions');
       }
     }
   }
@@ -77,6 +92,42 @@ export default class PicturePicker extends React.Component {
   };
 }
 
+const styles = StyleSheet.create({
+  gradientContainer: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      top: 0,
+      height: 443,
+  },
+  viewContainer: {
+    flex: 1,
+    backgroundColor: 'transparent',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonContainer: {
+    backgroundColor: 'white',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontWeight: 'bold',
+    color: 'rgb(0,0,0)',
+    borderRadius: 3,
+    marginTop:10,
+    marginBottom: 5,
+  },
+  imgContainer: { 
+    width: 250,
+    height: 250,
+    marginTop: 25,
+  },
+  iconContainer: { 
+    width: 100,
+    height: 100,
+    position: "relative",
+    marginBottom: 25,
+  },
+});
 
 
 // import React from 'react';
@@ -90,11 +141,4 @@ export default class PicturePicker extends React.Component {
 //   );
 // }
 
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: '#fff',
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//   },
-// });
+
