@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { StyleSheet, Button, Image, View} from 'react-native';
+import { StyleSheet, Button, Image, View, TouchableNativeFeedback} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 // import Constants from 'expo-constants';
@@ -10,12 +10,14 @@ SplashScreen.preventAutoHide();
 setTimeout(SplashScreen.hide, 3000);
 
 export default class PicturePicker extends React.Component {
-  state = {
-    image: null,
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      image: null
+    };
+  }
 
   render() {
-    let { image } = this.state;
 
     return (
       <View style={styles.viewContainer}>
@@ -40,9 +42,17 @@ export default class PicturePicker extends React.Component {
             color="black"
           />
         </View>
-        {image &&
-          <Image source={{ uri: image }} style={styles.imgContainer} 
-        />}
+        {this.state.image &&
+          <Image source={{ uri: this.state.image.uri }} style={styles.imgContainer} 
+          />
+        }
+        <View style={styles.buttonContainer}>
+          <Button
+            title="Classify bacteria"
+            onPress={this.sendPicture}
+            color="black"
+          />
+          </View>
       </View>
     );
   }
@@ -78,6 +88,28 @@ export default class PicturePicker extends React.Component {
     }
   }
 
+  sendPicture = async () => {
+    let h = new Headers();
+    h.append('Accept','application/json');
+    // let fd = new FormData();
+    // fd.append('bacteria',img,"bacteria.jpg")
+    // fetch('http://localhost:3000', { // Your POST endpoint
+      fetch('https://postman-echo.com/post', {
+        method: 'POST',
+        headers: h,
+          // Content-Type may need to be completely **omitted**
+          // or you may need something
+        body: this.state.image
+      }).then(
+        response => response.json() // if the response is a JSON object
+      ).then(
+        success => console.log(success) // Handle the success response object
+      ).catch(
+        error => console.log(error) // Handle the error response object
+      );
+    };
+
+
   _pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -89,7 +121,7 @@ export default class PicturePicker extends React.Component {
     console.log(result);
 
     if (!result.cancelled) {
-      this.setState({ image: result.uri });
+      this.setState({ image: result });
     }
   };
 
@@ -103,7 +135,7 @@ export default class PicturePicker extends React.Component {
     console.log(result);
 
     if (!result.cancelled) {
-      this.setState({ image: result.uri });
+      this.setState({ image: result });
     }
   };
 }
